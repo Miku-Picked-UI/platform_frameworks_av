@@ -28,6 +28,10 @@
 #include "AudioPolicyMix.h"
 #include "HwModule.h"
 
+// Miku-Picked UI: AxionFx effect type UUID (from AxionOS system/media effect_axionfx.h).
+static const effect_uuid_t kAxionFxTypeUuid =
+    { 0x5867be72, 0x4060, 0x4c55, 0xa378, { 0xc1, 0xcd, 0xef, 0x3e, 0x13, 0x53 } };
+
 namespace android {
 
 void EffectDescriptor::dump(String8 *dst, int spaces) const
@@ -173,6 +177,13 @@ bool EffectDescriptorCollection::isNonOffloadableEffectEnabled(
             ALOGE("%s: non offloadable effect %s, uuid %s, enabled on session %d", __func__,
                   effectDesc->mDesc.name, ToString(effectDesc->mDesc.uuid).c_str(),
                   effectDesc->mSession);
+            return true;
+        }
+        // Miku-Picked UI: AxionFx on the global session needs PCM (no offload).
+        if (effectDesc->mEnabled &&
+            effectDesc->mSession == AUDIO_SESSION_OUTPUT_MIX &&
+            memcmp(&effectDesc->mDesc.type, &kAxionFxTypeUuid, sizeof(effect_uuid_t)) == 0) {
+            ALOGV("%s: AxionFx effect enabled on global session, blocking offload", __func__);
             return true;
         }
     }

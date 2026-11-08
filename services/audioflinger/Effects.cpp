@@ -67,6 +67,10 @@
 
 #define DEFAULT_OUTPUT_SAMPLE_RATE 48000
 
+// Miku-Picked UI: AxionFx effect UUID (from AxionOS system/media effect_axionfx.h).
+static const effect_uuid_t kAxionFxImplUuid =
+    { 0xf35cb927, 0xa887, 0x4f3d, 0x847f, { 0x77, 0x06, 0x34, 0x48, 0x6d, 0x53 } };
+
 namespace android {
 
 using aidl_utils::statusTFromBinderStatus;
@@ -2989,6 +2993,9 @@ bool EffectChain::isEffectEligibleForSuspend(const effect_descriptor_t& desc)
          (memcmp(&desc.type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0) ||
          (memcmp(&desc.type, SL_IID_VOLUME, sizeof(effect_uuid_t)) == 0) ||
          (memcmp(&desc.type, SL_IID_DYNAMICSPROCESSING, sizeof(effect_uuid_t)) == 0))) {
+        return false;
+    }
+    if (memcmp(&desc.uuid, &kAxionFxImplUuid, sizeof(effect_uuid_t)) == 0) {
         return false;
     }
     return true;
